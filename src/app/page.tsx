@@ -158,15 +158,15 @@ export default function Home() {
   const remainingSeconds = sessionMinutes * 60 - elapsedSeconds;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col items-center justify-center p-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col items-center justify-center p-4 sm:p-8">
+      <div className="max-w-md w-full space-y-4 sm:space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-light text-white mb-2">Resonant</h1>
           <p className="text-slate-400 text-sm">Breathe with intention</p>
         </div>
 
         {/* Breathing Circle */}
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center h-48 sm:h-64">
           <div
             className="rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 transition-transform duration-100 ease-out flex items-center justify-center"
             style={{
@@ -217,8 +217,8 @@ export default function Home() {
         </div>
 
         {/* Settings */}
-        <Card className="p-6 bg-slate-800/50 border-slate-700">
-          <div className="space-y-6">
+        <Card className="p-4 sm:p-6 bg-slate-800/50 border-slate-700">
+          <div className="space-y-4 sm:space-y-6">
             <div>
               <div className="flex justify-between mb-2">
                 <label className="text-sm text-slate-300">
