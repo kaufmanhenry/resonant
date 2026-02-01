@@ -10,9 +10,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Resonant - Breathing Timer",
   description: "Simple resonant breathing timer with gentle chimes",
-  icons: {
-    icon: "/icon.svg",
-  },
 };
 
 export default function RootLayout({
