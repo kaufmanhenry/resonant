@@ -264,6 +264,36 @@ export default function Home() {
           Box breathing: {breathDuration}s inhale → {breathDuration}s hold →{" "}
           {breathDuration}s exhale → {breathDuration}s hold
         </p>
+
+        {/* Attribution */}
+        <div className="flex justify-center pt-4">
+          <a
+            href="https://kaufman.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-40 hover:opacity-70 transition-opacity"
+            aria-label="Built by Henry Kaufman"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 128 128"
+              className="w-8 h-8"
+            >
+              <rect width="128" height="128" rx="24" fill="#fff" />
+              <text
+                x="64"
+                y="88"
+                fontFamily="system-ui, -apple-system, sans-serif"
+                fontSize="56"
+                fontWeight="700"
+                textAnchor="middle"
+                fill="#000"
+              >
+                HK
+              </text>
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
   );
