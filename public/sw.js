@@ -60,13 +60,19 @@ self.addEventListener('fetch', (event) => {
       if (cached) {
         // Update cache in background
         fetch(request).then((response) => {
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, response));
+          // Don't cache redirects
+          if (response.ok && !response.redirected && response.type !== 'opaqueredirect') {
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, response));
+          }
         }).catch(() => {});
         return cached;
       }
       return fetch(request).then((response) => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+        // Only cache successful non-redirect responses
+        if (response.ok && !response.redirected && response.type !== 'opaqueredirect') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+        }
         return response;
       });
     })
