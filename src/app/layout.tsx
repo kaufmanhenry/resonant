@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { UpdateNotification } from "@/components/UpdateNotification";
 import "./globals.css";
 
 const inter = Inter({
@@ -44,19 +45,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         {children}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('SW registered:', reg.scope))
-                    .catch(err => console.log('SW registration failed:', err));
-                });
-              }
-            `,
-          }}
-        />
+        <UpdateNotification />
       </body>
     </html>
   );
