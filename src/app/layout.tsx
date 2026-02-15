@@ -24,12 +24,16 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0f172a" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -43,6 +47,9 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="color-scheme" content="dark" />
+        <meta name="theme-color" content="#0f172a" />
+        <meta name="supported-color-schemes" content="dark" />
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-gradient-to-b from-slate-900 to-slate-800 min-h-[100dvh]`}>
         {children}
