@@ -159,7 +159,7 @@ export default function Home() {
   const remainingSeconds = sessionMinutes * 60 - elapsedSeconds;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col">
+    <div className="min-h-[100dvh] flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8">
         <div className="max-w-md w-full space-y-4 sm:space-y-8">
         <div className="text-center">

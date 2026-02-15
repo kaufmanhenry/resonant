@@ -43,7 +43,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} font-sans antialiased bg-gradient-to-b from-slate-900 to-slate-800 min-h-screen`}>
         {children}
         <UpdateNotification />
       </body>
