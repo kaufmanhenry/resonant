@@ -149,8 +149,8 @@ export default function Home() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col">
-      {/* Main content - vertically centered */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+      {/* Main content - vertically centered, with safe area for Dynamic Island */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 pt-[max(2rem,env(safe-area-inset-top))]">
         <div className="w-full max-w-sm space-y-8">
           
           {/* Header */}
