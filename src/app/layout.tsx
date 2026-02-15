@@ -29,6 +29,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -37,13 +38,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="bg-slate-900">
       <head>
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className={`${inter.variable} font-sans antialiased bg-gradient-to-b from-slate-900 to-slate-800 min-h-screen`}>
+      <body className={`${inter.variable} font-sans antialiased bg-gradient-to-b from-slate-900 to-slate-800 min-h-[100dvh]`}>
         {children}
         <UpdateNotification />
       </body>
