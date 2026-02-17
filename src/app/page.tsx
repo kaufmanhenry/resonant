@@ -15,6 +15,11 @@ const phaseLabels: Record<BreathPhase, string> = {
 
 // Generate a chime sound using Web Audio API
 function playChime(audioContext: AudioContext, frequency: number = 523.25) {
+  // Ensure context is running before playing
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
+  
   const oscillator = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
 
@@ -49,14 +54,55 @@ export default function Home() {
   const [breathDuration, setBreathDuration] = useState(4);
   const [sessionMinutes, setSessionMinutes] = useState(5);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  const initAudio = useCallback(() => {
+  // Initialize and resume AudioContext - required for iOS/mobile
+  const initAudio = useCallback(async () => {
     if (!audioContextRef.current) {
       audioContextRef.current = new AudioContext();
     }
+    // iOS requires explicit resume after user gesture
+    if (audioContextRef.current.state === 'suspended') {
+      await audioContextRef.current.resume();
+    }
+    setAudioUnlocked(true);
   }, []);
+
+  // Unlock audio on first user interaction (before they even press Start)
+  // This helps ensure audio works reliably on mobile PWAs
+  useEffect(() => {
+    const unlockAudio = async () => {
+      if (audioUnlocked) return;
+      
+      try {
+        if (!audioContextRef.current) {
+          audioContextRef.current = new AudioContext();
+        }
+        if (audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume();
+        }
+        // Play a silent buffer to fully unlock audio on iOS
+        const buffer = audioContextRef.current.createBuffer(1, 1, 22050);
+        const source = audioContextRef.current.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioContextRef.current.destination);
+        source.start(0);
+        setAudioUnlocked(true);
+      } catch (e) {
+        console.warn('Audio unlock failed:', e);
+      }
+    };
+
+    // Unlock on any user interaction
+    const events = ['touchstart', 'touchend', 'click', 'keydown'];
+    events.forEach(e => document.addEventListener(e, unlockAudio, { once: true }));
+    
+    return () => {
+      events.forEach(e => document.removeEventListener(e, unlockAudio));
+    };
+  }, [audioUnlocked]);
 
   const phaseOrder: BreathPhase[] = ["inhale", "holdIn", "exhale", "holdOut"];
 
@@ -104,8 +150,8 @@ export default function Home() {
     }
   }, [isRunning]);
 
-  const handleStart = () => {
-    initAudio();
+  const handleStart = async () => {
+    await initAudio();
     setIsRunning(true);
   };
 
