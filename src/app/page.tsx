@@ -39,6 +39,35 @@ function playChime(audioContext: AudioContext, frequency: number = 523.25) {
   oscillator.stop(audioContext.currentTime + 0.5);
 }
 
+// Distinct 3-note ascending completion chime (C5 → E5 → G5)
+function playCompletionChime(audioContext: AudioContext) {
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
+
+  const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+  const now = audioContext.currentTime;
+
+  notes.forEach((freq, i) => {
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+
+    osc.type = "sine";
+    osc.frequency.value = freq;
+
+    const startTime = now + i * 0.3;
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(0.45, startTime + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 1.4);
+
+    osc.start(startTime);
+    osc.stop(startTime + 1.4);
+  });
+}
+
 // Different frequencies for different phases
 const phaseFrequencies: Record<BreathPhase, number> = {
   inhale: 523.25, // C5
@@ -117,6 +146,9 @@ export default function Home() {
         const newElapsed = prev + intervalMs / 1000;
         if (newElapsed >= sessionMinutes * 60) {
           setIsRunning(false);
+          if (audioContextRef.current) {
+            playCompletionChime(audioContextRef.current);
+          }
           return 0;
         }
         return newElapsed;
