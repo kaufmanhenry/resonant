@@ -362,42 +362,42 @@ export default function Home() {
 
   // ── Main screen ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-[100dvh] flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 pt-[max(2rem,env(safe-area-inset-top))]">
-        <div className="w-full max-w-sm space-y-8">
+    <div className="min-h-[100dvh] flex flex-col bg-slate-900">
+      <div className="flex-1 flex flex-col items-center px-5 py-6 pt-[max(1.5rem,env(safe-area-inset-top))]">
+        <div className="w-full max-w-sm flex flex-col flex-1">
 
-          {/* Header */}
-          <header className="text-center">
-            <h1 className="text-3xl font-light text-white tracking-wide">Resonant</h1>
-            <p className="text-slate-400 text-sm mt-1">Breathe with intention</p>
+          {/* Header - compact */}
+          <header className="text-center py-2">
+            <h1 className="text-2xl font-light text-white tracking-wide">Resonant</h1>
+            <p className="text-slate-500 text-xs mt-0.5">Breathe with intention</p>
           </header>
 
-          {/* Breathing Circle */}
-          <div className="flex items-center justify-center py-4">
+          {/* Breathing Circle - centered in available space */}
+          <div className="flex-1 flex items-center justify-center min-h-0">
             <div
-              className="rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 shadow-lg shadow-blue-500/20 transition-transform duration-100 ease-out flex items-center justify-center"
-              style={{ width: "180px", height: "180px", transform: `scale(${getCircleScale()})` }}
+              className="rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 shadow-xl shadow-blue-500/25 transition-transform duration-100 ease-out flex items-center justify-center"
+              style={{ width: "160px", height: "160px", transform: `scale(${getCircleScale()})` }}
             >
-              <span className="text-white text-lg font-light tracking-wide">
+              <span className="text-white text-base font-light tracking-wide">
                 {phaseLabels[phase]}
               </span>
             </div>
           </div>
 
-          {/* Timer */}
-          <div className="text-center">
-            <p className="text-5xl font-light text-white tabular-nums tracking-tight">
+          {/* Timer - tighter */}
+          <div className="text-center py-4">
+            <p className="text-5xl font-extralight text-white tabular-nums tracking-tight">
               {formatTime(remainingSeconds)}
             </p>
-            <p className="text-slate-500 text-sm mt-2">remaining</p>
+            <p className="text-slate-500 text-xs mt-1">remaining</p>
           </div>
 
-          {/* Controls */}
-          <div className="flex justify-center gap-3">
+          {/* Controls - more compact */}
+          <div className="flex justify-center gap-3 pb-5">
             {!isRunning ? (
               <button
                 onClick={handleStart}
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium rounded-xl transition-colors touch-manipulation"
+                className="flex items-center justify-center gap-2 px-7 py-3.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium rounded-xl transition-colors touch-manipulation"
               >
                 <Play className="h-5 w-5" />
                 Start
@@ -405,7 +405,7 @@ export default function Home() {
             ) : (
               <button
                 onClick={handlePause}
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white font-medium rounded-xl transition-colors touch-manipulation"
+                className="flex items-center justify-center gap-2 px-7 py-3.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white font-medium rounded-xl transition-colors touch-manipulation"
               >
                 <Pause className="h-5 w-5" />
                 Pause
@@ -413,50 +413,51 @@ export default function Home() {
             )}
             <button
               onClick={handleReset}
-              className="flex items-center justify-center gap-2 px-6 py-4 bg-transparent border border-slate-600 hover:border-slate-500 hover:bg-slate-800/50 active:bg-slate-700/50 text-slate-300 font-medium rounded-xl transition-colors touch-manipulation"
+              className="flex items-center justify-center gap-2 px-5 py-3.5 bg-transparent border border-slate-700 hover:border-slate-600 hover:bg-slate-800/50 active:bg-slate-700/50 text-slate-400 font-medium rounded-xl transition-colors touch-manipulation"
             >
               <RotateCcw className="h-5 w-5" />
               Reset
             </button>
           </div>
 
-          {/* Settings Card */}
-          <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 space-y-5">
+          {/* Settings Card - compact */}
+          <div className="bg-slate-800/50 border border-slate-700/40 rounded-2xl p-4 space-y-4">
 
-            {/* Pattern Selector */}
+            {/* Pattern Selector - Segmented Control Style */}
             <div>
               <label className="text-sm font-medium text-slate-300 block mb-3">
                 Pattern
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex bg-slate-700/40 rounded-xl p-1">
                 {(Object.values(PATTERNS) as BreathPattern[]).map((pattern) => (
                   <button
                     key={pattern.id}
                     onClick={() => handleSelectPattern(pattern.id)}
                     disabled={isRunning}
-                    className={`flex flex-col items-center gap-0.5 py-2.5 px-2 rounded-lg text-center transition-colors touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed ${
+                    className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-medium text-center transition-all touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed ${
                       selectedPatternId === pattern.id
-                        ? "bg-blue-600 text-white"
-                        : "bg-slate-700/60 text-slate-300 hover:bg-slate-700 active:bg-slate-600"
+                        ? "bg-blue-600 text-white shadow-lg"
+                        : "text-slate-400 hover:text-slate-200 active:bg-slate-700/50"
                     }`}
                   >
-                    <span className="text-sm font-medium">{pattern.name}</span>
-                    <span className={`text-xs ${selectedPatternId === pattern.id ? "text-blue-200" : "text-slate-500"}`}>
-                      {pattern.tagline}
-                    </span>
+                    {pattern.name}
                   </button>
                 ))}
               </div>
+              {/* Selected pattern tagline */}
+              <p className="text-center text-slate-500 text-xs mt-2">
+                {selectedPattern.tagline}
+              </p>
             </div>
 
             {/* Breath Duration (box only) */}
             {selectedPatternId === "box" && (
               <div>
-                <div className="flex justify-between items-center mb-3">
-                  <label className="text-sm font-medium text-slate-300">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-xs font-medium text-slate-400">
                     Breath Duration
                   </label>
-                  <span className="text-sm text-slate-400 tabular-nums">
+                  <span className="text-xs text-slate-500 tabular-nums">
                     {breathDuration}s per phase
                   </span>
                 </div>
@@ -468,10 +469,10 @@ export default function Home() {
                   max={8}
                   step={1}
                   disabled={isRunning}
-                  className="w-full h-2 bg-slate-700 rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
+                  className="w-full h-1.5 bg-slate-700 rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
                     [&::-webkit-slider-thumb]:appearance-none
-                    [&::-webkit-slider-thumb]:w-5
-                    [&::-webkit-slider-thumb]:h-5
+                    [&::-webkit-slider-thumb]:w-4
+                    [&::-webkit-slider-thumb]:h-4
                     [&::-webkit-slider-thumb]:rounded-full
                     [&::-webkit-slider-thumb]:bg-white
                     [&::-webkit-slider-thumb]:shadow-md
@@ -484,11 +485,11 @@ export default function Home() {
 
             {/* Session Length */}
             <div>
-              <div className="flex justify-between items-center mb-3">
-                <label className="text-sm font-medium text-slate-300">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-xs font-medium text-slate-400">
                   Session Length
                 </label>
-                <span className="text-sm text-slate-400 tabular-nums">
+                <span className="text-xs text-slate-500 tabular-nums">
                   {sessionMinutes} min
                 </span>
               </div>
@@ -500,10 +501,10 @@ export default function Home() {
                 max={20}
                 step={1}
                 disabled={isRunning}
-                className="w-full h-2 bg-slate-700 rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
+                className="w-full h-1.5 bg-slate-700 rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
                   [&::-webkit-slider-thumb]:appearance-none
-                  [&::-webkit-slider-thumb]:w-5
-                  [&::-webkit-slider-thumb]:h-5
+                  [&::-webkit-slider-thumb]:w-4
+                  [&::-webkit-slider-thumb]:h-4
                   [&::-webkit-slider-thumb]:rounded-full
                   [&::-webkit-slider-thumb]:bg-white
                   [&::-webkit-slider-thumb]:shadow-md
@@ -513,11 +514,6 @@ export default function Home() {
               />
             </div>
           </div>
-
-          {/* Pattern description */}
-          <p className="text-center text-slate-500 text-xs leading-relaxed">
-            {formatPatternLabel(effectiveDurations)}
-          </p>
 
         </div>
       </div>
