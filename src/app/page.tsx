@@ -13,6 +13,77 @@ const phaseLabels: Record<BreathPhase, string> = {
   holdOut: "Hold",
 };
 
+// ─── Silent audio loop (bypasses iOS silent switch) ──────────────────────────
+
+// Minimal WAV: 1 second of silence at 8kHz mono 16-bit
+function createSilentWavDataUri(): string {
+  const sampleRate = 8000;
+  const numSamples = sampleRate; // 1 second
+  const byteRate = sampleRate * 2;
+  const dataSize = numSamples * 2;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+  const writeString = (offset: number, str: string) => {
+    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+  };
+  writeString(0, "RIFF");
+  view.setUint32(4, 36 + dataSize, true);
+  writeString(8, "WAVE");
+  writeString(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, byteRate, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeString(36, "data");
+  view.setUint32(40, dataSize, true);
+  // samples are already 0 (silence)
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return "data:audio/wav;base64," + btoa(binary);
+}
+
+let silentAudio: HTMLAudioElement | null = null;
+
+function startSilentAudioLoop() {
+  if (silentAudio) return;
+  silentAudio = new Audio(createSilentWavDataUri());
+  silentAudio.loop = true;
+  silentAudio.volume = 0.01;
+  silentAudio.play().catch(() => {});
+}
+
+function stopSilentAudioLoop() {
+  if (!silentAudio) return;
+  silentAudio.pause();
+  silentAudio.src = "";
+  silentAudio = null;
+}
+
+// ─── Wake Lock ───────────────────────────────────────────────────────────────
+
+let wakeLock: WakeLockSentinel | null = null;
+
+async function requestWakeLock() {
+  if (!("wakeLock" in navigator)) return;
+  try {
+    wakeLock = await navigator.wakeLock.request("screen");
+    wakeLock.addEventListener("release", () => { wakeLock = null; });
+  } catch {
+    // Wake lock can fail if tab is not visible
+  }
+}
+
+function releaseWakeLock() {
+  if (wakeLock) {
+    wakeLock.release();
+    wakeLock = null;
+  }
+}
+
 // ─── Audio ────────────────────────────────────────────────────────────────────
 
 function playChime(audioContext: AudioContext, frequency: number = 523.25) {
@@ -186,6 +257,17 @@ export default function Home() {
     return () => events.forEach((e) => document.removeEventListener(e, unlockAudio));
   }, [audioUnlocked]);
 
+  // ── Re-acquire wake lock on tab visibility change ───────────────────────────
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible" && isRunning) {
+        requestWakeLock();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [isRunning]);
+
   // ── Main interval ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!isRunning) return;
@@ -198,6 +280,8 @@ export default function Home() {
         if (newElapsed >= sessionMinutes * 60) {
           setIsRunning(false);
           setIsComplete(true);
+          stopSilentAudioLoop();
+          releaseWakeLock();
           if (audioContextRef.current) playCompletionChime(audioContextRef.current);
           return prev; // keep for display on complete screen
         }
@@ -244,10 +328,16 @@ export default function Home() {
   // ── Handlers ─────────────────────────────────────────────────────────────────
   const handleStart = async () => {
     await initAudio();
+    startSilentAudioLoop();
+    requestWakeLock();
     setIsRunning(true);
   };
 
-  const handlePause = () => setIsRunning(false);
+  const handlePause = () => {
+    setIsRunning(false);
+    stopSilentAudioLoop();
+    releaseWakeLock();
+  };
 
   const handleReset = () => {
     setIsRunning(false);
@@ -256,14 +346,20 @@ export default function Home() {
     setPhaseProgress(0);
     setElapsedSeconds(0);
     setCyclesCompleted(0);
+    stopSilentAudioLoop();
+    releaseWakeLock();
   };
 
-  const handleRestart = () => {
+  const handleRestart = async () => {
+    await initAudio();
+    startSilentAudioLoop();
+    requestWakeLock();
     setIsComplete(false);
     setPhase("inhale");
     setPhaseProgress(0);
     setElapsedSeconds(0);
     setCyclesCompleted(0);
+    setIsRunning(true);
   };
 
   const handleSelectPattern = (id: PatternId) => {
