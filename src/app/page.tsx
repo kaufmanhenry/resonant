@@ -189,9 +189,21 @@ export default function Home() {
   const [isComplete, setIsComplete] = useState(false);
   const [phase, setPhase] = useState<BreathPhase>("inhale");
   const [phaseProgress, setPhaseProgress] = useState(0);
-  const [selectedPatternId, setSelectedPatternId] = useState<PatternId>("box");
-  const [breathDuration, setBreathDuration] = useState(4);
-  const [sessionMinutes, setSessionMinutes] = useState(5);
+  const [selectedPatternId, setSelectedPatternId] = useState<PatternId>(() => {
+    if (typeof window === "undefined") return "box";
+    const saved = localStorage.getItem("resonant-pattern");
+    return saved && saved in PATTERNS ? (saved as PatternId) : "box";
+  });
+  const [breathDuration, setBreathDuration] = useState(() => {
+    if (typeof window === "undefined") return 4;
+    const saved = parseInt(localStorage.getItem("resonant-breathDuration") || "");
+    return saved >= 2 && saved <= 8 ? saved : 4;
+  });
+  const [sessionMinutes, setSessionMinutes] = useState(() => {
+    if (typeof window === "undefined") return 5;
+    const saved = parseInt(localStorage.getItem("resonant-sessionMinutes") || "");
+    return saved >= 1 && saved <= 20 ? saved : 5;
+  });
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [cyclesCompleted, setCyclesCompleted] = useState(0);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
@@ -203,12 +215,15 @@ export default function Home() {
 
   const selectedPattern = PATTERNS[selectedPatternId];
 
-  // Keep refs in sync with settings
+  // Keep refs in sync with settings & persist to localStorage
   useEffect(() => {
     const durations = getEffectiveDurations(selectedPattern, breathDuration);
     phaseDurationsRef.current = durations;
     activePhasesRef.current = getActivePhases(durations);
-  }, [selectedPatternId, breathDuration]);
+    localStorage.setItem("resonant-pattern", selectedPatternId);
+    localStorage.setItem("resonant-breathDuration", String(breathDuration));
+    localStorage.setItem("resonant-sessionMinutes", String(sessionMinutes));
+  }, [selectedPatternId, breathDuration, sessionMinutes]);
 
   // Keep currentPhaseRef in sync with phase state
   useEffect(() => {
@@ -268,22 +283,30 @@ export default function Home() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [isRunning]);
 
-  // ── Main interval ────────────────────────────────────────────────────────────
+  // ── Main animation loop ──────────────────────────────────────────────────────
+  const lastFrameRef = useRef(0);
+
   useEffect(() => {
     if (!isRunning) return;
-    const intervalMs = 50;
+    lastFrameRef.current = performance.now();
+    let rafId: number;
 
-    const interval = setInterval(() => {
+    const tick = (now: number) => {
+      const deltaMs = now - lastFrameRef.current;
+      lastFrameRef.current = now;
+      // Cap delta to avoid huge jumps after tab switch
+      const dt = Math.min(deltaMs, 200);
+
       // Elapsed time / session end
       setElapsedSeconds((prev) => {
-        const newElapsed = prev + intervalMs / 1000;
+        const newElapsed = prev + dt / 1000;
         if (newElapsed >= sessionMinutes * 60) {
           setIsRunning(false);
           setIsComplete(true);
           stopSilentAudioLoop();
           releaseWakeLock();
           if (audioContextRef.current) playCompletionChime(audioContextRef.current);
-          return prev; // keep for display on complete screen
+          return prev;
         }
         return newElapsed;
       });
@@ -291,7 +314,7 @@ export default function Home() {
       // Phase progress
       setPhaseProgress((prev) => {
         const currentDuration = phaseDurationsRef.current[currentPhaseRef.current] * 1000;
-        const newProgress = prev + intervalMs / currentDuration;
+        const newProgress = prev + dt / currentDuration;
         if (newProgress >= 1) {
           setPhase((currentPhase) => {
             const activePhases = activePhasesRef.current;
@@ -299,7 +322,6 @@ export default function Home() {
             const nextIndex = (currentIndex + 1) % activePhases.length;
             const nextPhase = activePhases[nextIndex];
 
-            // Count a cycle each time we wrap back to the first phase
             if (nextIndex === 0) {
               setCyclesCompleted((c) => c + 1);
             }
@@ -307,15 +329,19 @@ export default function Home() {
             if (audioContextRef.current) {
               playChime(audioContextRef.current, phaseFrequencies[nextPhase]);
             }
+            if (navigator.vibrate) navigator.vibrate(15);
             return nextPhase;
           });
           return 0;
         }
         return newProgress;
       });
-    }, intervalMs);
 
-    return () => clearInterval(interval);
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
   }, [isRunning, sessionMinutes]);
 
   // Play opening chime when session starts
@@ -474,9 +500,16 @@ export default function Home() {
               className="rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 shadow-xl shadow-blue-500/25 transition-transform duration-100 ease-out flex items-center justify-center"
               style={{ width: "160px", height: "160px", transform: `scale(${getCircleScale()})` }}
             >
-              <span className="text-white text-base font-light tracking-wide">
-                {phaseLabels[phase]}
-              </span>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-white text-base font-light tracking-wide">
+                  {phaseLabels[phase]}
+                </span>
+                {isRunning && (
+                  <span className="text-white/60 text-sm tabular-nums font-light">
+                    {Math.ceil(effectiveDurations[phase] * (1 - phaseProgress))}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
