@@ -1,9 +1,9 @@
 export function Footer() {
   return (
-    <footer className="border-t border-white/10 mt-auto">
+    <footer className="border-t border-[var(--r-divider)] mt-auto">
       <div className="max-w-sm mx-auto px-5 py-3">
         <div className="flex items-center justify-between text-sm">
-          <div className="font-light text-white">
+          <div className="font-light text-[var(--r-text)]">
             Resonant
           </div>
           <a
@@ -18,7 +18,7 @@ export function Footer() {
               viewBox="0 0 128 128"
               className="w-5 h-5"
             >
-              <rect width="128" height="128" rx="24" fill="white" />
+              <rect width="128" height="128" rx="24" fill="currentColor" />
               <text
                 x="64"
                 y="88"
@@ -26,7 +26,7 @@ export function Footer() {
                 fontSize="56"
                 fontWeight="700"
                 textAnchor="middle"
-                fill="#0f172a"
+                fill="var(--r-bg)"
               >
                 HK
               </text>

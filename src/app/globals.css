@@ -115,17 +115,78 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ── Resonant theme tokens ─────────────────────────────────────── */
+:root {
+  --r-bg: #f1f5f9;
+  --r-bg-gradient-from: #f1f5f9;
+  --r-bg-gradient-to: #e2e8f0;
+  --r-card: rgba(255, 255, 255, 0.7);
+  --r-card-border: rgba(148, 163, 184, 0.3);
+  --r-text: #0f172a;
+  --r-text-secondary: #475569;
+  --r-text-muted: #94a3b8;
+  --r-control-bg: rgba(203, 213, 225, 0.5);
+  --r-control-active: #2563eb;
+  --r-control-active-text: #ffffff;
+  --r-control-hover: rgba(203, 213, 225, 0.5);
+  --r-btn-primary: #2563eb;
+  --r-btn-primary-hover: #3b82f6;
+  --r-btn-primary-active: #1d4ed8;
+  --r-btn-secondary-bg: transparent;
+  --r-btn-secondary-border: #94a3b8;
+  --r-btn-secondary-border-hover: #64748b;
+  --r-btn-secondary-text: #475569;
+  --r-slider-track: #cbd5e1;
+  --r-slider-thumb: #0f172a;
+  --r-divider: rgba(148, 163, 184, 0.3);
+  --r-circle-from: #60a5fa;
+  --r-circle-to: #4f46e5;
+  --r-circle-shadow: rgba(59, 130, 246, 0.2);
+  --r-session-row-bg: rgba(241, 245, 249, 0.6);
+  --r-session-row-border: rgba(203, 213, 225, 0.3);
+}
+
+:root.dark {
+  --r-bg: #0f172a;
+  --r-bg-gradient-from: #0f172a;
+  --r-bg-gradient-to: #1e293b;
+  --r-card: rgba(30, 41, 59, 0.5);
+  --r-card-border: rgba(51, 65, 85, 0.4);
+  --r-text: #ffffff;
+  --r-text-secondary: #94a3b8;
+  --r-text-muted: #64748b;
+  --r-control-bg: rgba(51, 65, 85, 0.4);
+  --r-control-active: #2563eb;
+  --r-control-active-text: #ffffff;
+  --r-control-hover: rgba(51, 65, 85, 0.5);
+  --r-btn-primary: #2563eb;
+  --r-btn-primary-hover: #3b82f6;
+  --r-btn-primary-active: #1d4ed8;
+  --r-btn-secondary-bg: transparent;
+  --r-btn-secondary-border: #475569;
+  --r-btn-secondary-border-hover: #64748b;
+  --r-btn-secondary-text: #94a3b8;
+  --r-slider-track: #334155;
+  --r-slider-thumb: #ffffff;
+  --r-divider: rgba(255, 255, 255, 0.1);
+  --r-circle-from: #60a5fa;
+  --r-circle-to: #4f46e5;
+  --r-circle-shadow: rgba(59, 130, 246, 0.25);
+  --r-session-row-bg: rgba(30, 41, 59, 0.4);
+  --r-session-row-border: rgba(51, 65, 85, 0.3);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   html {
-    background-color: #0f172a;
+    background-color: var(--r-bg);
     min-height: 100%;
     min-height: -webkit-fill-available;
   }
   body {
-    background-color: #0f172a;
+    background: linear-gradient(to bottom, var(--r-bg-gradient-from), var(--r-bg-gradient-to));
     min-height: 100vh;
     min-height: 100dvh;
     min-height: -webkit-fill-available;

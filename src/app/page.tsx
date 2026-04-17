@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Play, Pause, RotateCcw, History } from "lucide-react";
+import { Play, Pause, RotateCcw, History, Sun, Moon, Monitor } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { recordSession, getSessionStats, type SessionStats } from "@/lib/sessions";
+import { useTheme } from "@/hooks/useTheme";
 
 type BreathPhase = "inhale" | "holdIn" | "exhale" | "holdOut";
 
@@ -186,6 +187,7 @@ function formatPatternLabel(durations: Record<BreathPhase, number>): string {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Home() {
+  const { theme, setTheme } = useTheme();
   const [isRunning, setIsRunning] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [phase, setPhase] = useState<BreathPhase>("inhale");
@@ -438,64 +440,67 @@ export default function Home() {
           <div className="w-full max-w-sm space-y-8 text-center">
             {/* Icon */}
             <div className="flex items-center justify-center">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 shadow-lg shadow-blue-500/30 flex items-center justify-center text-4xl">
+              <div
+                className="w-24 h-24 rounded-full shadow-lg flex items-center justify-center text-4xl"
+                style={{ background: `linear-gradient(to bottom right, var(--r-circle-from), var(--r-circle-to))`, boxShadow: `0 10px 15px -3px var(--r-circle-shadow)` }}
+              >
                 🌿
               </div>
             </div>
 
             {/* Title */}
             <div>
-              <h2 className="text-3xl font-light text-white tracking-wide">
+              <h2 className="text-3xl font-light tracking-wide text-[var(--r-text)]">
                 Session complete
               </h2>
-              <p className="text-slate-400 text-sm mt-2">Nice work. Take a moment.</p>
+              <p className="text-[var(--r-text-secondary)] text-sm mt-2">Nice work. Take a moment.</p>
             </div>
 
             {/* Session Stats */}
-            <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
+            <div className="bg-[var(--r-card)] backdrop-blur-sm border border-[var(--r-card-border)] rounded-2xl p-6">
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <p className="text-2xl font-light text-white tabular-nums">
+                  <p className="text-2xl font-light text-[var(--r-text)] tabular-nums">
                     {sessionMinutes}
                   </p>
-                  <p className="text-slate-400 text-xs mt-1">minutes</p>
+                  <p className="text-[var(--r-text-secondary)] text-xs mt-1">minutes</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-light text-white tabular-nums">
+                  <p className="text-2xl font-light text-[var(--r-text)] tabular-nums">
                     {cyclesCompleted}
                   </p>
-                  <p className="text-slate-400 text-xs mt-1">cycles</p>
+                  <p className="text-[var(--r-text-secondary)] text-xs mt-1">cycles</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-light text-white">
+                  <p className="text-2xl font-light text-[var(--r-text)]">
                     {selectedPattern.name}
                   </p>
-                  <p className="text-slate-400 text-xs mt-1">pattern</p>
+                  <p className="text-[var(--r-text-secondary)] text-xs mt-1">pattern</p>
                 </div>
               </div>
             </div>
 
             {/* Streak */}
             {stats && (
-              <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
+              <div className="bg-[var(--r-card)] backdrop-blur-sm border border-[var(--r-card-border)] rounded-2xl p-6">
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <p className="text-2xl font-light text-white tabular-nums">
+                    <p className="text-2xl font-light text-[var(--r-text)] tabular-nums">
                       {stats.currentStreak}
                     </p>
-                    <p className="text-slate-400 text-xs mt-1">day streak</p>
+                    <p className="text-[var(--r-text-secondary)] text-xs mt-1">day streak</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-light text-white tabular-nums">
+                    <p className="text-2xl font-light text-[var(--r-text)] tabular-nums">
                       {stats.totalSessions}
                     </p>
-                    <p className="text-slate-400 text-xs mt-1">total sessions</p>
+                    <p className="text-[var(--r-text-secondary)] text-xs mt-1">total sessions</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-light text-white tabular-nums">
+                    <p className="text-2xl font-light text-[var(--r-text)] tabular-nums">
                       {stats.totalMinutes}
                     </p>
-                    <p className="text-slate-400 text-xs mt-1">total min</p>
+                    <p className="text-[var(--r-text-secondary)] text-xs mt-1">total min</p>
                   </div>
                 </div>
               </div>
@@ -505,14 +510,14 @@ export default function Home() {
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleRestart}
-                className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium rounded-xl transition-colors touch-manipulation"
+                className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-[var(--r-btn-primary)] hover:bg-[var(--r-btn-primary-hover)] active:bg-[var(--r-btn-primary-active)] text-white font-medium rounded-xl transition-colors touch-manipulation"
               >
                 <Play className="h-5 w-5" />
                 Go again
               </button>
               <button
                 onClick={handleReset}
-                className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-transparent border border-slate-600 hover:border-slate-500 hover:bg-slate-800/50 active:bg-slate-700/50 text-slate-300 font-medium rounded-xl transition-colors touch-manipulation"
+                className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-transparent border border-[var(--r-btn-secondary-border)] hover:border-[var(--r-btn-secondary-border-hover)] text-[var(--r-btn-secondary-text)] font-medium rounded-xl transition-colors touch-manipulation"
               >
                 Done
               </button>
@@ -527,14 +532,14 @@ export default function Home() {
   // ── History screen ─────────────────────────────────────────────────────────────
   if (showHistory) {
     return (
-      <div className="min-h-[100dvh] flex flex-col bg-slate-900">
+      <div className="min-h-[100dvh] flex flex-col bg-[var(--r-bg)]">
         <div className="flex-1 flex flex-col items-center px-5 py-6 pt-[max(1.5rem,env(safe-area-inset-top))]">
           <div className="w-full max-w-sm flex flex-col flex-1">
             <header className="flex items-center justify-between py-2">
-              <h1 className="text-2xl font-light text-white tracking-wide">History</h1>
+              <h1 className="text-2xl font-light text-[var(--r-text)] tracking-wide">History</h1>
               <button
                 onClick={() => setShowHistory(false)}
-                className="text-slate-400 hover:text-white text-sm transition-colors touch-manipulation"
+                className="text-[var(--r-text-secondary)] hover:text-[var(--r-text)] text-sm transition-colors touch-manipulation"
               >
                 Done
               </button>
@@ -543,32 +548,32 @@ export default function Home() {
             {stats && (
               <>
                 {/* Streak & totals */}
-                <div className="bg-slate-800/50 border border-slate-700/40 rounded-2xl p-5 mt-4">
+                <div className="bg-[var(--r-card)] border border-[var(--r-card-border)] rounded-2xl p-5 mt-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
-                      <p className="text-3xl font-light text-white tabular-nums">{stats.currentStreak}</p>
-                      <p className="text-slate-400 text-xs mt-1">current streak</p>
+                      <p className="text-3xl font-light text-[var(--r-text)] tabular-nums">{stats.currentStreak}</p>
+                      <p className="text-[var(--r-text-secondary)] text-xs mt-1">current streak</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-light text-white tabular-nums">{stats.longestStreak}</p>
-                      <p className="text-slate-400 text-xs mt-1">longest streak</p>
+                      <p className="text-3xl font-light text-[var(--r-text)] tabular-nums">{stats.longestStreak}</p>
+                      <p className="text-[var(--r-text-secondary)] text-xs mt-1">longest streak</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-light text-white tabular-nums">{stats.totalSessions}</p>
-                      <p className="text-slate-400 text-xs mt-1">total sessions</p>
+                      <p className="text-3xl font-light text-[var(--r-text)] tabular-nums">{stats.totalSessions}</p>
+                      <p className="text-[var(--r-text-secondary)] text-xs mt-1">total sessions</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-light text-white tabular-nums">{stats.totalMinutes}</p>
-                      <p className="text-slate-400 text-xs mt-1">total minutes</p>
+                      <p className="text-3xl font-light text-[var(--r-text)] tabular-nums">{stats.totalMinutes}</p>
+                      <p className="text-[var(--r-text-secondary)] text-xs mt-1">total minutes</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Recent sessions */}
                 <div className="mt-6 flex-1 overflow-y-auto">
-                  <h2 className="text-sm font-medium text-slate-400 mb-3">Recent Sessions</h2>
+                  <h2 className="text-sm font-medium text-[var(--r-text-secondary)] mb-3">Recent Sessions</h2>
                   {stats.recentSessions.length === 0 ? (
-                    <p className="text-slate-500 text-sm text-center py-8">No sessions yet. Start breathing!</p>
+                    <p className="text-[var(--r-text-muted)] text-sm text-center py-8">No sessions yet. Start breathing!</p>
                   ) : (
                     <div className="space-y-2">
                       {stats.recentSessions.map((session, i) => {
@@ -576,14 +581,14 @@ export default function Home() {
                         const dateStr = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
                         const timeStr = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
                         return (
-                          <div key={i} className="flex items-center justify-between bg-slate-800/40 border border-slate-700/30 rounded-xl px-4 py-3">
+                          <div key={i} className="flex items-center justify-between bg-[var(--r-session-row-bg)] border border-[var(--r-session-row-border)] rounded-xl px-4 py-3">
                             <div>
-                              <p className="text-white text-sm font-light">{session.pattern}</p>
-                              <p className="text-slate-500 text-xs">{dateStr} at {timeStr}</p>
+                              <p className="text-[var(--r-text)] text-sm font-light">{session.pattern}</p>
+                              <p className="text-[var(--r-text-muted)] text-xs">{dateStr} at {timeStr}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-white text-sm tabular-nums">{session.durationMinutes} min</p>
-                              <p className="text-slate-500 text-xs">{session.cycles} cycles</p>
+                              <p className="text-[var(--r-text)] text-sm tabular-nums">{session.durationMinutes} min</p>
+                              <p className="text-[var(--r-text-muted)] text-xs">{session.cycles} cycles</p>
                             </div>
                           </div>
                         );
@@ -600,33 +605,51 @@ export default function Home() {
     );
   }
 
+  // ── Theme toggle ─────────────────────────────────────────────────────────────
+  const themeIcon = theme === "dark" ? Moon : theme === "light" ? Sun : Monitor;
+  const ThemeIcon = themeIcon;
+  const nextTheme = theme === "dark" ? "light" : theme === "light" ? "system" : "dark";
+  const themeLabel = theme === "dark" ? "Dark" : theme === "light" ? "Light" : "System";
+
   // ── Main screen ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-slate-900">
+    <div className="min-h-[100dvh] flex flex-col bg-[var(--r-bg)]">
       <div className="flex-1 flex flex-col items-center px-5 py-6 pt-[max(1.5rem,env(safe-area-inset-top))]">
         <div className="w-full max-w-sm flex flex-col flex-1">
 
-          {/* Header - compact */}
+          {/* Header */}
           <header className="flex items-center justify-between py-2">
-            <div className="w-8" />
+            <button
+              onClick={() => setTheme(nextTheme)}
+              className="w-8 h-8 flex items-center justify-center text-[var(--r-text-muted)] hover:text-[var(--r-text)] transition-colors touch-manipulation"
+              aria-label={`Theme: ${themeLabel}. Click to change.`}
+            >
+              <ThemeIcon className="h-5 w-5" />
+            </button>
             <div className="text-center">
-              <h1 className="text-2xl font-light text-white tracking-wide">Resonant</h1>
-              <p className="text-slate-500 text-xs mt-0.5">Breathe with intention</p>
+              <h1 className="text-2xl font-light text-[var(--r-text)] tracking-wide">Resonant</h1>
+              <p className="text-[var(--r-text-muted)] text-xs mt-0.5">Breathe with intention</p>
             </div>
             <button
               onClick={() => { setStats(getSessionStats()); setShowHistory(true); }}
-              className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-white transition-colors touch-manipulation"
+              className="w-8 h-8 flex items-center justify-center text-[var(--r-text-muted)] hover:text-[var(--r-text)] transition-colors touch-manipulation"
               aria-label="Session history"
             >
               <History className="h-5 w-5" />
             </button>
           </header>
 
-          {/* Breathing Circle - centered in available space */}
+          {/* Breathing Circle */}
           <div className="flex-1 flex items-center justify-center min-h-0">
             <div
-              className="rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 shadow-xl shadow-blue-500/25 transition-transform duration-100 ease-out flex items-center justify-center"
-              style={{ width: "160px", height: "160px", transform: `scale(${getCircleScale()})` }}
+              className="rounded-full shadow-xl transition-transform duration-100 ease-out flex items-center justify-center"
+              style={{
+                width: "160px",
+                height: "160px",
+                transform: `scale(${getCircleScale()})`,
+                background: `linear-gradient(to bottom right, var(--r-circle-from), var(--r-circle-to))`,
+                boxShadow: `0 20px 25px -5px var(--r-circle-shadow)`,
+              }}
             >
               <div className="flex flex-col items-center gap-1">
                 <span className="text-white text-base font-light tracking-wide">
@@ -641,20 +664,20 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Timer - tighter */}
+          {/* Timer */}
           <div className="text-center py-4">
-            <p className="text-5xl font-extralight text-white tabular-nums tracking-tight">
+            <p className="text-5xl font-extralight text-[var(--r-text)] tabular-nums tracking-tight">
               {formatTime(remainingSeconds)}
             </p>
-            <p className="text-slate-500 text-xs mt-1">remaining</p>
+            <p className="text-[var(--r-text-muted)] text-xs mt-1">remaining</p>
           </div>
 
-          {/* Controls - more compact */}
+          {/* Controls */}
           <div className="flex justify-center gap-3 pb-5">
             {!isRunning ? (
               <button
                 onClick={handleStart}
-                className="flex items-center justify-center gap-2 px-7 py-3.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium rounded-xl transition-colors touch-manipulation"
+                className="flex items-center justify-center gap-2 px-7 py-3.5 bg-[var(--r-btn-primary)] hover:bg-[var(--r-btn-primary-hover)] active:bg-[var(--r-btn-primary-active)] text-white font-medium rounded-xl transition-colors touch-manipulation"
               >
                 <Play className="h-5 w-5" />
                 Start
@@ -662,7 +685,7 @@ export default function Home() {
             ) : (
               <button
                 onClick={handlePause}
-                className="flex items-center justify-center gap-2 px-7 py-3.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white font-medium rounded-xl transition-colors touch-manipulation"
+                className="flex items-center justify-center gap-2 px-7 py-3.5 bg-[var(--r-control-bg)] hover:opacity-80 text-[var(--r-text)] font-medium rounded-xl transition-colors touch-manipulation"
               >
                 <Pause className="h-5 w-5" />
                 Pause
@@ -670,22 +693,22 @@ export default function Home() {
             )}
             <button
               onClick={handleReset}
-              className="flex items-center justify-center gap-2 px-5 py-3.5 bg-transparent border border-slate-700 hover:border-slate-600 hover:bg-slate-800/50 active:bg-slate-700/50 text-slate-400 font-medium rounded-xl transition-colors touch-manipulation"
+              className="flex items-center justify-center gap-2 px-5 py-3.5 bg-transparent border border-[var(--r-card-border)] hover:border-[var(--r-btn-secondary-border-hover)] text-[var(--r-text-secondary)] font-medium rounded-xl transition-colors touch-manipulation"
             >
               <RotateCcw className="h-5 w-5" />
               Reset
             </button>
           </div>
 
-          {/* Settings Card - compact */}
-          <div className="bg-slate-800/50 border border-slate-700/40 rounded-2xl p-4 space-y-4">
+          {/* Settings Card */}
+          <div className="bg-[var(--r-card)] border border-[var(--r-card-border)] rounded-2xl p-4 space-y-4">
 
-            {/* Pattern Selector - Segmented Control Style */}
+            {/* Pattern Selector */}
             <div>
-              <label className="text-sm font-medium text-slate-300 block mb-3">
+              <label className="text-sm font-medium text-[var(--r-text-secondary)] block mb-3">
                 Pattern
               </label>
-              <div className="flex bg-slate-700/40 rounded-xl p-1">
+              <div className="flex bg-[var(--r-control-bg)] rounded-xl p-1">
                 {(Object.values(PATTERNS) as BreathPattern[]).map((pattern) => (
                   <button
                     key={pattern.id}
@@ -693,16 +716,15 @@ export default function Home() {
                     disabled={isRunning}
                     className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-medium text-center transition-all touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed ${
                       selectedPatternId === pattern.id
-                        ? "bg-blue-600 text-white shadow-lg"
-                        : "text-slate-400 hover:text-slate-200 active:bg-slate-700/50"
+                        ? "bg-[var(--r-control-active)] text-[var(--r-control-active-text)] shadow-lg"
+                        : "text-[var(--r-text-secondary)] hover:text-[var(--r-text)]"
                     }`}
                   >
                     {pattern.name}
                   </button>
                 ))}
               </div>
-              {/* Selected pattern tagline */}
-              <p className="text-center text-slate-500 text-xs mt-2">
+              <p className="text-center text-[var(--r-text-muted)] text-xs mt-2">
                 {selectedPattern.tagline}
               </p>
             </div>
@@ -711,10 +733,10 @@ export default function Home() {
             {selectedPatternId === "box" && (
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-xs font-medium text-slate-400">
+                  <label className="text-xs font-medium text-[var(--r-text-secondary)]">
                     Breath Duration
                   </label>
-                  <span className="text-xs text-slate-500 tabular-nums">
+                  <span className="text-xs text-[var(--r-text-muted)] tabular-nums">
                     {breathDuration}s per phase
                   </span>
                 </div>
@@ -726,12 +748,12 @@ export default function Home() {
                   max={8}
                   step={1}
                   disabled={isRunning}
-                  className="w-full h-1.5 bg-slate-700 rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
+                  className="w-full h-1.5 bg-[var(--r-slider-track)] rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
                     [&::-webkit-slider-thumb]:appearance-none
                     [&::-webkit-slider-thumb]:w-4
                     [&::-webkit-slider-thumb]:h-4
                     [&::-webkit-slider-thumb]:rounded-full
-                    [&::-webkit-slider-thumb]:bg-white
+                    [&::-webkit-slider-thumb]:bg-[var(--r-slider-thumb)]
                     [&::-webkit-slider-thumb]:shadow-md
                     [&::-webkit-slider-thumb]:cursor-pointer
                     [&::-webkit-slider-thumb]:transition-transform
@@ -743,10 +765,10 @@ export default function Home() {
             {/* Session Length */}
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="text-xs font-medium text-slate-400">
+                <label className="text-xs font-medium text-[var(--r-text-secondary)]">
                   Session Length
                 </label>
-                <span className="text-xs text-slate-500 tabular-nums">
+                <span className="text-xs text-[var(--r-text-muted)] tabular-nums">
                   {sessionMinutes} min
                 </span>
               </div>
@@ -758,12 +780,12 @@ export default function Home() {
                 max={20}
                 step={1}
                 disabled={isRunning}
-                className="w-full h-1.5 bg-slate-700 rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
+                className="w-full h-1.5 bg-[var(--r-slider-track)] rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
                   [&::-webkit-slider-thumb]:appearance-none
                   [&::-webkit-slider-thumb]:w-4
                   [&::-webkit-slider-thumb]:h-4
                   [&::-webkit-slider-thumb]:rounded-full
-                  [&::-webkit-slider-thumb]:bg-white
+                  [&::-webkit-slider-thumb]:bg-[var(--r-slider-thumb)]
                   [&::-webkit-slider-thumb]:shadow-md
                   [&::-webkit-slider-thumb]:cursor-pointer
                   [&::-webkit-slider-thumb]:transition-transform
