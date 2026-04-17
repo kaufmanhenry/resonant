@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Play, Pause, RotateCcw, History } from "lucide-react";
 import { Footer } from "@/components/Footer";
+import { recordSession, getSessionStats, type SessionStats } from "@/lib/sessions";
 
 type BreathPhase = "inhale" | "holdIn" | "exhale" | "holdOut";
 
@@ -207,6 +208,13 @@ export default function Home() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [cyclesCompleted, setCyclesCompleted] = useState(0);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [stats, setStats] = useState<SessionStats | null>(null);
+
+  // Load stats on mount
+  useEffect(() => {
+    setStats(getSessionStats());
+  }, []);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const phaseDurationsRef = useRef<Record<BreathPhase, number>>(PATTERNS.box.phases);
@@ -344,6 +352,14 @@ export default function Home() {
     return () => cancelAnimationFrame(rafId);
   }, [isRunning, sessionMinutes]);
 
+  // Record session on completion
+  useEffect(() => {
+    if (isComplete) {
+      const updated = recordSession(selectedPattern.name, sessionMinutes, cyclesCompleted);
+      setStats(updated);
+    }
+  }, [isComplete]);
+
   // Play opening chime when session starts
   useEffect(() => {
     if (isRunning && audioContextRef.current) {
@@ -435,7 +451,7 @@ export default function Home() {
               <p className="text-slate-400 text-sm mt-2">Nice work. Take a moment.</p>
             </div>
 
-            {/* Stats */}
+            {/* Session Stats */}
             <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
               <div className="grid grid-cols-3 gap-4">
                 <div>
@@ -458,6 +474,32 @@ export default function Home() {
                 </div>
               </div>
             </div>
+
+            {/* Streak */}
+            {stats && (
+              <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-2xl font-light text-white tabular-nums">
+                      {stats.currentStreak}
+                    </p>
+                    <p className="text-slate-400 text-xs mt-1">day streak</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-light text-white tabular-nums">
+                      {stats.totalSessions}
+                    </p>
+                    <p className="text-slate-400 text-xs mt-1">total sessions</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-light text-white tabular-nums">
+                      {stats.totalMinutes}
+                    </p>
+                    <p className="text-slate-400 text-xs mt-1">total min</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex flex-col gap-3">
@@ -482,6 +524,82 @@ export default function Home() {
     );
   }
 
+  // ── History screen ─────────────────────────────────────────────────────────────
+  if (showHistory) {
+    return (
+      <div className="min-h-[100dvh] flex flex-col bg-slate-900">
+        <div className="flex-1 flex flex-col items-center px-5 py-6 pt-[max(1.5rem,env(safe-area-inset-top))]">
+          <div className="w-full max-w-sm flex flex-col flex-1">
+            <header className="flex items-center justify-between py-2">
+              <h1 className="text-2xl font-light text-white tracking-wide">History</h1>
+              <button
+                onClick={() => setShowHistory(false)}
+                className="text-slate-400 hover:text-white text-sm transition-colors touch-manipulation"
+              >
+                Done
+              </button>
+            </header>
+
+            {stats && (
+              <>
+                {/* Streak & totals */}
+                <div className="bg-slate-800/50 border border-slate-700/40 rounded-2xl p-5 mt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <p className="text-3xl font-light text-white tabular-nums">{stats.currentStreak}</p>
+                      <p className="text-slate-400 text-xs mt-1">current streak</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-light text-white tabular-nums">{stats.longestStreak}</p>
+                      <p className="text-slate-400 text-xs mt-1">longest streak</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-light text-white tabular-nums">{stats.totalSessions}</p>
+                      <p className="text-slate-400 text-xs mt-1">total sessions</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-3xl font-light text-white tabular-nums">{stats.totalMinutes}</p>
+                      <p className="text-slate-400 text-xs mt-1">total minutes</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent sessions */}
+                <div className="mt-6 flex-1 overflow-y-auto">
+                  <h2 className="text-sm font-medium text-slate-400 mb-3">Recent Sessions</h2>
+                  {stats.recentSessions.length === 0 ? (
+                    <p className="text-slate-500 text-sm text-center py-8">No sessions yet. Start breathing!</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {stats.recentSessions.map((session, i) => {
+                        const d = new Date(session.date);
+                        const dateStr = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+                        const timeStr = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+                        return (
+                          <div key={i} className="flex items-center justify-between bg-slate-800/40 border border-slate-700/30 rounded-xl px-4 py-3">
+                            <div>
+                              <p className="text-white text-sm font-light">{session.pattern}</p>
+                              <p className="text-slate-500 text-xs">{dateStr} at {timeStr}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-white text-sm tabular-nums">{session.durationMinutes} min</p>
+                              <p className="text-slate-500 text-xs">{session.cycles} cycles</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   // ── Main screen ───────────────────────────────────────────────────────────────
   return (
     <div className="min-h-[100dvh] flex flex-col bg-slate-900">
@@ -489,9 +607,19 @@ export default function Home() {
         <div className="w-full max-w-sm flex flex-col flex-1">
 
           {/* Header - compact */}
-          <header className="text-center py-2">
-            <h1 className="text-2xl font-light text-white tracking-wide">Resonant</h1>
-            <p className="text-slate-500 text-xs mt-0.5">Breathe with intention</p>
+          <header className="flex items-center justify-between py-2">
+            <div className="w-8" />
+            <div className="text-center">
+              <h1 className="text-2xl font-light text-white tracking-wide">Resonant</h1>
+              <p className="text-slate-500 text-xs mt-0.5">Breathe with intention</p>
+            </div>
+            <button
+              onClick={() => { setStats(getSessionStats()); setShowHistory(true); }}
+              className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-white transition-colors touch-manipulation"
+              aria-label="Session history"
+            >
+              <History className="h-5 w-5" />
+            </button>
           </header>
 
           {/* Breathing Circle - centered in available space */}
