@@ -212,10 +212,17 @@ export default function Home() {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [stats, setStats] = useState<SessionStats | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [liveText, setLiveText] = useState("");
 
-  // Load stats on mount
+  // Load stats on mount & detect reduced motion preference
   useEffect(() => {
     setStats(getSessionStats());
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, []);
 
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -340,6 +347,7 @@ export default function Home() {
               playChime(audioContextRef.current, phaseFrequencies[nextPhase]);
             }
             if (navigator.vibrate) navigator.vibrate(15);
+            setLiveText(phaseLabels[nextPhase]);
             return nextPhase;
           });
           return 0;
@@ -413,6 +421,7 @@ export default function Home() {
 
   // ── Circle animation ──────────────────────────────────────────────────────────
   const getCircleScale = () => {
+    if (reducedMotion) return 0.75; // Static size when motion is reduced
     const base = 0.5;
     const range = 0.5;
     switch (phase) {
@@ -639,10 +648,17 @@ export default function Home() {
             </button>
           </header>
 
+          {/* Screen reader announcements */}
+          <div aria-live="assertive" aria-atomic="true" className="sr-only">
+            {liveText}
+          </div>
+
           {/* Breathing Circle */}
           <div className="flex-1 flex items-center justify-center min-h-0">
             <div
-              className="rounded-full shadow-xl transition-transform duration-100 ease-out flex items-center justify-center"
+              role="img"
+              aria-label={`Breathing circle: ${phaseLabels[phase]}${isRunning ? `, ${Math.ceil(effectiveDurations[phase] * (1 - phaseProgress))} seconds remaining` : ""}`}
+              className={`rounded-full shadow-xl flex items-center justify-center ${reducedMotion ? "" : "transition-transform duration-100 ease-out"}`}
               style={{
                 width: "160px",
                 height: "160px",
@@ -652,11 +668,11 @@ export default function Home() {
               }}
             >
               <div className="flex flex-col items-center gap-1">
-                <span className="text-white text-base font-light tracking-wide">
+                <span className="text-white text-base font-light tracking-wide" aria-hidden="true">
                   {phaseLabels[phase]}
                 </span>
                 {isRunning && (
-                  <span className="text-white/60 text-sm tabular-nums font-light">
+                  <span className="text-white/60 text-sm tabular-nums font-light" aria-hidden="true">
                     {Math.ceil(effectiveDurations[phase] * (1 - phaseProgress))}
                   </span>
                 )}
@@ -665,7 +681,7 @@ export default function Home() {
           </div>
 
           {/* Timer */}
-          <div className="text-center py-4">
+          <div className="text-center py-4" role="timer" aria-label={`${formatTime(remainingSeconds)} remaining`}>
             <p className="text-5xl font-extralight text-[var(--r-text)] tabular-nums tracking-tight">
               {formatTime(remainingSeconds)}
             </p>
@@ -742,6 +758,7 @@ export default function Home() {
                 </div>
                 <input
                   type="range"
+                  aria-label={`Breath duration: ${breathDuration} seconds per phase`}
                   value={breathDuration}
                   onChange={(e) => setBreathDuration(Number(e.target.value))}
                   min={2}
@@ -774,6 +791,7 @@ export default function Home() {
               </div>
               <input
                 type="range"
+                aria-label={`Session length: ${sessionMinutes} minutes`}
                 value={sessionMinutes}
                 onChange={(e) => setSessionMinutes(Number(e.target.value))}
                 min={1}
